@@ -22,7 +22,8 @@ defmodule Explorer.Chain.Import.Stage.BlockReferencing do
       Runner.OptimismTxnBatches,
       Runner.OptimismOutputRoots,
       Runner.OptimismWithdrawals,
-      Runner.OptimismWithdrawalEvents
+      Runner.OptimismWithdrawalEvents,
+      Runner.OptimismDeposits
     ]
 
   @impl Stage
