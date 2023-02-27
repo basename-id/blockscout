@@ -6466,4 +6466,52 @@ defmodule Explorer.Chain do
     end)
     |> List.to_tuple()
   end
+
+  @spec flat_1155_batch_token_transfers([TokenTransfer.t()]) :: [TokenTransfer.t()]
+  def flat_1155_batch_token_transfers(token_transfers) when is_list(token_transfers) do
+    Enum.reduce(token_transfers, [], fn tt, acc ->
+      case tt.token_ids do
+        [] ->
+          acc ++ [tt]
+
+        [_token_id] ->
+          acc ++ [tt]
+
+        token_ids when is_list(token_ids) ->
+          transfers =
+            Enum.map(tt.amounts |> Enum.zip(token_ids) |> Enum.with_index(), fn {{amount, token_id}, index} ->
+              %TokenTransfer{tt | token_ids: [token_id], amount: amount, amounts: nil, index_in_batch: index}
+            end)
+
+          acc ++ transfers
+
+        _ ->
+          acc ++ [tt]
+      end
+    end)
+  end
+
+  @spec paginate_1155_batch_token_transfers(PagingOptions.t(), [TokenTransfer.t()]) :: [TokenTransfer.t()]
+  def paginate_1155_batch_token_transfers(token_transfers, options) do
+    paging_options = options |> Keyword.get(:paging_options, nil)
+
+    case paging_options do
+      %PagingOptions{batch_key: batch_key} when not is_nil(batch_key) ->
+        {batch_block_hash, batch_transaction_hash, batch_log_index, index_in_batch} = batch_key
+
+        token_transfers
+        |> Enum.reverse()
+        |> Enum.reduce_while([], fn tt, acc ->
+          if tt.block_hash == batch_block_hash and tt.transaction_hash == batch_transaction_hash and
+               tt.log_index == batch_log_index and tt.index_in_batch == index_in_batch do
+            {:halt, acc}
+          else
+            {:cont, [tt | acc]}
+          end
+        end)
+
+      _ ->
+        token_transfers
+    end
+  end
 end
