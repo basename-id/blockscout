@@ -6467,7 +6467,7 @@ defmodule Explorer.Chain do
     |> List.to_tuple()
   end
 
-  @spec flat_1155_batch_token_transfers([%TokenTransfer{}]) :: [%TokenTransfer{}]
+  @spec flat_1155_batch_token_transfers([TokenTransfer.t()], Decimal.t() | nil) :: [TokenTransfer.t()]
   def flat_1155_batch_token_transfers(token_transfers, token_id \\ nil) when is_list(token_transfers) do
     Enum.reduce(token_transfers, [], fn tt, acc ->
       case tt.token_ids do
@@ -6500,7 +6500,7 @@ defmodule Explorer.Chain do
     |> Enum.reject(&is_nil/1)
   end
 
-  @spec paginate_1155_batch_token_transfers([%TokenTransfer{}], [paging_options]) :: [%TokenTransfer{}]
+  @spec paginate_1155_batch_token_transfers([TokenTransfer.t()], [paging_options]) :: [TokenTransfer.t()]
   def paginate_1155_batch_token_transfers(token_transfers, options) do
     paging_options = options |> Keyword.get(:paging_options, nil)
 
