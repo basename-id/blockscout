@@ -285,7 +285,7 @@ defmodule Explorer.Chain do
       |> common_where_limit_order(paging_options)
       |> preload(transaction: :block)
       |> join_associations(necessity_by_association)
-      |> Repo.all()
+      |> select_repo(options).all()
     else
       InternalTransaction
       |> InternalTransaction.where_nonpending_block()
@@ -294,7 +294,7 @@ defmodule Explorer.Chain do
       |> common_where_limit_order(paging_options)
       |> preload(transaction: :block)
       |> join_associations(necessity_by_association)
-      |> Repo.all()
+      |> select_repo(options).all()
     end
   end
 
@@ -376,7 +376,8 @@ defmodule Explorer.Chain do
           address_to_transactions_without_rewards(address_hash, options)
 
         address_has_rewards?(address_hash) ->
-          %{payout_key: block_miner_payout_address} = Reward.get_validator_payout_key_by_mining(address_hash)
+          %{payout_key: block_miner_payout_address} =
+            Reward.get_validator_payout_key_by_mining_from_db(address_hash, options)
 
           if block_miner_payout_address && address_hash == block_miner_payout_address do
             transactions_with_rewards_results(address_hash, options, paging_options)
@@ -396,7 +397,7 @@ defmodule Explorer.Chain do
     blocks_range = address_to_transactions_tasks_range_of_blocks(address_hash, options)
 
     rewards_task =
-      Task.async(fn -> Reward.fetch_emission_rewards_tuples(address_hash, paging_options, blocks_range) end)
+      Task.async(fn -> Reward.fetch_emission_rewards_tuples(address_hash, paging_options, blocks_range, options) end)
 
     [rewards_task | address_to_transactions_tasks(address_hash, options)]
     |> wait_for_address_transactions()
@@ -477,7 +478,7 @@ defmodule Explorer.Chain do
     |> where_block_number_in_period(from_block, to_block)
     |> join_associations(necessity_by_association)
     |> Transaction.matching_address_queries_list(direction, address_hash)
-    |> Enum.map(fn query -> Task.async(fn -> Repo.all(query) end) end)
+    |> Enum.map(fn query -> Task.async(fn -> select_repo(options).all(query) end) end)
   end
 
   defp address_to_mined_transactions_tasks(address_hash, options) do
@@ -578,7 +579,7 @@ defmodule Explorer.Chain do
     |> TokenTransfer.token_transfers_by_address_hash(address_hash, filters)
     |> join_associations(necessity_by_association)
     |> TokenTransfer.handle_paging_options(paging_options)
-    |> Repo.all()
+    |> select_repo(options).all()
   end
 
   @spec address_hash_to_token_transfers_by_token_address_hash(
@@ -595,7 +596,7 @@ defmodule Explorer.Chain do
     |> TokenTransfer.token_transfers_by_address_hash_and_token_address_hash(token_address_hash)
     |> join_associations(necessity_by_association)
     |> TokenTransfer.handle_paging_options(paging_options)
-    |> Repo.all()
+    |> select_repo(options).all()
   end
 
   @doc """
@@ -708,7 +709,7 @@ defmodule Explorer.Chain do
 
     wrapped_query
     |> where_block_number_in_period(from_block, to_block)
-    |> Repo.all()
+    |> select_repo(options).all()
     |> Enum.take(paging_options.page_size)
   end
 
@@ -1356,7 +1357,7 @@ defmodule Explorer.Chain do
   Optionally it also accepts a boolean to fetch the `has_decompiled_code?` virtual field or not
 
   """
-  @spec hash_to_address(Hash.Address.t(), [necessity_by_association_option], boolean()) ::
+  @spec hash_to_address(Hash.Address.t(), Keyword.t(), boolean()) ::
           {:ok, Address.t()} | {:error, :not_found}
   def hash_to_address(
         %Hash{byte_count: unquote(Hash.Address.byte_count())} = hash,
@@ -1383,7 +1384,7 @@ defmodule Explorer.Chain do
       query
       |> join_associations(necessity_by_association)
       |> with_decompiled_code_flag(hash, query_decompiled_code_flag)
-      |> Repo.one()
+      |> select_repo(options).one()
 
     address_updated_result =
       case address_result do
@@ -2389,7 +2390,7 @@ defmodule Explorer.Chain do
       |> Accounts.take_enough()
       |> case do
         nil ->
-          accounts_with_n = fetch_top_addresses(paging_options)
+          accounts_with_n = fetch_top_addresses(options)
 
           accounts_with_n
           |> Enum.map(fn {address, _n} -> address end)
@@ -2409,11 +2410,13 @@ defmodule Explorer.Chain do
           )
       end
     else
-      fetch_top_addresses(paging_options)
+      fetch_top_addresses(options)
     end
   end
 
-  defp fetch_top_addresses(paging_options) do
+  defp fetch_top_addresses(options) do
+    paging_options = Keyword.get(options, :paging_options, @default_paging_options)
+
     base_query =
       from(a in Address,
         where: a.fetched_coin_balance > ^0,
@@ -2425,7 +2428,7 @@ defmodule Explorer.Chain do
     base_query
     |> page_addresses(paging_options)
     |> limit(^paging_options.page_size)
-    |> Repo.all()
+    |> select_repo(options).all()
   end
 
   @doc """
@@ -2525,7 +2528,7 @@ defmodule Explorer.Chain do
     |> page_blocks(paging_options)
     |> limit(^paging_options.page_size)
     |> order_by(desc: :number)
-    |> Repo.all()
+    |> select_repo(options).all()
   end
 
   def check_if_validated_blocks_at_address(address_hash) do
@@ -2590,11 +2593,11 @@ defmodule Explorer.Chain do
   @doc """
   Counts the number of `t:Explorer.Chain.Block.t/0` validated by the address with the given `hash`.
   """
-  @spec address_to_validation_count(Hash.Address.t()) :: non_neg_integer()
-  def address_to_validation_count(hash) do
+  @spec address_to_validation_count(Hash.Address.t(), Keyword.t()) :: non_neg_integer()
+  def address_to_validation_count(hash, options) do
     query = from(block in Block, where: block.miner_hash == ^hash, select: fragment("COUNT(*)"))
 
-    Repo.one(query)
+    select_repo(options).one(query)
   end
 
   @spec address_to_transaction_count(Address.t()) :: non_neg_integer()
@@ -4933,7 +4936,7 @@ defmodule Explorer.Chain do
     query
     |> join_associations(necessity_by_association)
     |> preload(:contract_address)
-    |> Repo.one()
+    |> select_repo(options).one()
     |> case do
       nil ->
         {:error, :not_found}
@@ -5124,22 +5127,22 @@ defmodule Explorer.Chain do
     end
   end
 
-  @spec fetch_last_token_balances(Hash.Address.t()) :: []
-  def fetch_last_token_balances(address_hash) do
+  @spec fetch_last_token_balances(Hash.Address.t(), Keyword.t()) :: []
+  def fetch_last_token_balances(address_hash, options \\ []) do
     address_hash
     |> CurrentTokenBalance.last_token_balances()
-    |> Repo.all()
+    |> select_repo(options).all()
   end
 
-  @spec fetch_last_token_balances(Hash.Address.t(), [paging_options]) :: []
-  def fetch_last_token_balances(address_hash, options) do
+  @spec fetch_paginated_last_token_balances(Hash.Address.t(), [paging_options]) :: []
+  def fetch_paginated_last_token_balances(address_hash, options) do
     filter = Keyword.get(options, :token_type)
     options = Keyword.delete(options, :token_type)
 
     address_hash
     |> CurrentTokenBalance.last_token_balances(options, filter)
     |> page_current_token_balances(options)
-    |> Repo.all()
+    |> select_repo(options).all()
   end
 
   @spec erc721_or_erc1155_token_instance_from_token_id_and_token_address(binary(), Hash.Address.t()) ::
@@ -5186,7 +5189,7 @@ defmodule Explorer.Chain do
     end
   end
 
-  @spec address_to_coin_balances(Hash.Address.t(), [paging_options]) :: []
+  @spec address_to_coin_balances(Hash.Address.t(), Keyword.t()) :: []
   def address_to_coin_balances(address_hash, options) do
     paging_options = Keyword.get(options, :paging_options, @default_paging_options)
 
@@ -5194,7 +5197,7 @@ defmodule Explorer.Chain do
       address_hash
       |> fetch_coin_balances(paging_options)
       |> page_coin_balances(paging_options)
-      |> Repo.all()
+      |> select_repo(options).all()
 
     if Enum.empty?(balances_raw) do
       balances_raw
@@ -5213,8 +5216,8 @@ defmodule Explorer.Chain do
         |> Enum.max_by(fn balance -> balance.block_number end, fn -> %{} end)
         |> Map.get(:block_number)
 
-      min_block_timestamp = find_block_timestamp(min_block_number)
-      max_block_timestamp = find_block_timestamp(max_block_number)
+      min_block_timestamp = find_block_timestamp(min_block_number, options)
+      max_block_timestamp = find_block_timestamp(max_block_number, options)
 
       min_block_unix_timestamp =
         min_block_timestamp
@@ -5267,19 +5270,19 @@ defmodule Explorer.Chain do
     Repo.one(query)
   end
 
-  @spec address_to_balances_by_day(Hash.Address.t(), true | false) :: [balance_by_day]
-  def address_to_balances_by_day(address_hash, api? \\ false) do
+  @spec address_to_balances_by_day(Hash.Address.t(), Keyword.t()) :: [balance_by_day]
+  def address_to_balances_by_day(address_hash, options \\ []) do
     latest_block_timestamp =
       address_hash
       |> CoinBalance.last_coin_balance_timestamp()
-      |> Repo.one()
+      |> select_repo(options).one()
 
     address_hash
     |> CoinBalanceDaily.balances_by_day()
-    |> Repo.all()
+    |> select_repo(options).all()
     |> Enum.sort_by(fn %{date: d} -> {d.year, d.month, d.day} end)
     |> replace_last_value(latest_block_timestamp)
-    |> normalize_balances_by_day(api?)
+    |> normalize_balances_by_day(Keyword.get(options, :api?, false))
   end
 
   # https://github.com/blockscout/blockscout/issues/2658
@@ -6060,12 +6063,12 @@ defmodule Explorer.Chain do
     end
   end
 
-  defp find_block_timestamp(number) do
+  defp find_block_timestamp(number, options) do
     Block
     |> where([b], b.number == ^number)
     |> select([b], b.timestamp)
     |> limit(1)
-    |> Repo.one()
+    |> select_repo(options).one()
   end
 
   @spec get_token_transfer_type(TokenTransfer.t()) ::
@@ -6388,10 +6391,10 @@ defmodule Explorer.Chain do
     NewContractsCounter.fetch()
   end
 
-  def address_counters(address) do
+  def address_counters(address, options \\ []) do
     validation_count_task =
       Task.async(fn ->
-        address_to_validation_count(address.hash)
+        address_to_validation_count(address.hash, options)
       end)
 
     Task.start_link(fn ->
@@ -6543,5 +6546,13 @@ defmodule Explorer.Chain do
         {:cont, [tt | acc]}
       end
     end)
+  end
+
+  def select_repo(options) do
+    if Keyword.get(options, :api?, false) do
+      Repo.replica()
+    else
+      Repo
+    end
   end
 end
