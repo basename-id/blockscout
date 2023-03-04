@@ -46,7 +46,7 @@ defmodule BlockScoutWeb.API.RPC.RPCTranslator do
         |> halt()
 
       {:error, error} ->
-        Logger.error(fn -> ["Error while calling RPC action", inspect(error)] end)
+        APILogger.error(fn -> ["Error while calling RPC action", inspect(error)] end)
 
         conn
         |> put_status(500)

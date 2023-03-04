@@ -4,6 +4,8 @@ defmodule BlockScoutWeb.API.APILogger do
   """
   require Logger
 
+  @params [application: :api]
+
   def log(conn) do
     endpoint =
       if conn.query_string do
@@ -12,14 +14,14 @@ defmodule BlockScoutWeb.API.APILogger do
         conn.request_path
       end
 
-    Logger.debug(endpoint,
-      fetcher: :api
-    )
+    Logger.debug(endpoint, @params)
   end
 
   def message(text) do
-    Logger.debug(text,
-      fetcher: :api
-    )
+    Logger.debug(text, @params)
+  end
+
+  def error(error) do
+    Logger.error(error, @params)
   end
 end
