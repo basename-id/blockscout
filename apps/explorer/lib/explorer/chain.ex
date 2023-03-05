@@ -693,7 +693,7 @@ defmodule Explorer.Chain do
 
     base_query =
       base
-      |> filter_topic(options)
+      |> filter_topic(Keyword.get(options, :topic))
 
     wrapped_query =
       from(
@@ -713,15 +713,15 @@ defmodule Explorer.Chain do
     |> Enum.take(paging_options.page_size)
   end
 
-  defp filter_topic(base_query, topic: topic) do
+  defp filter_topic(base_query, nil), do: base_query
+
+  defp filter_topic(base_query, topic) do
     from(log in base_query,
       where:
         log.first_topic == ^topic or log.second_topic == ^topic or log.third_topic == ^topic or
           log.fourth_topic == ^topic
     )
   end
-
-  defp filter_topic(base_query, _), do: base_query
 
   def where_block_number_in_period(base_query, from_block, to_block) when is_nil(from_block) and not is_nil(to_block) do
     from(q in base_query,
@@ -965,10 +965,11 @@ defmodule Explorer.Chain do
     |> where([_, block], block.hash == ^block_hash)
     |> join_associations(necessity_by_association)
     |> (&if(old_ui?, do: preload(&1, [{:token_transfers, [:token, :from_address, :to_address]}]), else: &1)).()
-    |> Repo.all()
+    |> select_repo(options).all()
     |> (&if(old_ui?,
           do: &1,
-          else: Enum.map(&1, fn tx -> preload_token_transfers(tx, @token_transfers_necessity_by_association) end)
+          else:
+            Enum.map(&1, fn tx -> preload_token_transfers(tx, @token_transfers_necessity_by_association, options) end)
         )).()
   end
 
@@ -1997,14 +1998,14 @@ defmodule Explorer.Chain do
       `t:Explorer.Chain.Block.t/0` will not be included in the page `entries`.
 
   """
-  @spec hash_to_block(Hash.Full.t(), [necessity_by_association_option]) :: {:ok, Block.t()} | {:error, :not_found}
+  @spec hash_to_block(Hash.Full.t(), Keyword.t()) :: {:ok, Block.t()} | {:error, :not_found}
   def hash_to_block(%Hash{byte_count: unquote(Hash.Full.byte_count())} = hash, options \\ []) when is_list(options) do
     necessity_by_association = Keyword.get(options, :necessity_by_association, %{})
 
     Block
     |> where(hash: ^hash)
     |> join_associations(necessity_by_association)
-    |> Repo.one()
+    |> select_repo(options).one()
     |> case do
       nil ->
         {:error, :not_found}
@@ -2092,6 +2093,7 @@ defmodule Explorer.Chain do
   def preload_token_transfers(
         %Transaction{hash: tx_hash, block_hash: block_hash} = transaction,
         necessity_by_association,
+        options,
         preload_to_detect_tt? \\ true
       ) do
     token_transfers =
@@ -2108,7 +2110,7 @@ defmodule Explorer.Chain do
       |> limit(^if(preload_to_detect_tt?, do: 1, else: @token_transfers_per_transaction_preview + 1))
       |> order_by([token_transfer], asc: token_transfer.log_index)
       |> join_associations(necessity_by_association)
-      |> Repo.all()
+      |> select_repo(options).all()
 
     %Transaction{transaction | token_transfers: token_transfers}
   end
@@ -2298,7 +2300,7 @@ defmodule Explorer.Chain do
     * ':block_type' - use to filter by type of block; Uncle`, `Reorg`, or `Block` (default).
 
   """
-  @spec list_blocks([paging_options | necessity_by_association_option]) :: [Block.t()]
+  @spec list_blocks(Keyword.t()) :: [Block.t()]
   def list_blocks(options \\ []) when is_list(options) do
     necessity_by_association = Keyword.get(options, :necessity_by_association, %{})
     paging_options = Keyword.get(options, :paging_options) || @default_paging_options
@@ -2306,20 +2308,20 @@ defmodule Explorer.Chain do
 
     cond do
       block_type == "Block" && !paging_options.key ->
-        block_from_cache(block_type, paging_options, necessity_by_association)
+        block_from_cache(block_type, paging_options, necessity_by_association, options)
 
       block_type == "Uncle" && !paging_options.key ->
-        uncles_from_cache(block_type, paging_options, necessity_by_association)
+        uncles_from_cache(block_type, paging_options, necessity_by_association, options)
 
       true ->
-        fetch_blocks(block_type, paging_options, necessity_by_association)
+        fetch_blocks(block_type, paging_options, necessity_by_association, options)
     end
   end
 
-  defp block_from_cache(block_type, paging_options, necessity_by_association) do
+  defp block_from_cache(block_type, paging_options, necessity_by_association, options) do
     case Blocks.take_enough(paging_options.page_size) do
       nil ->
-        elements = fetch_blocks(block_type, paging_options, necessity_by_association)
+        elements = fetch_blocks(block_type, paging_options, necessity_by_association, options)
 
         Blocks.update(elements)
 
@@ -2330,10 +2332,10 @@ defmodule Explorer.Chain do
     end
   end
 
-  def uncles_from_cache(block_type, paging_options, necessity_by_association) do
+  def uncles_from_cache(block_type, paging_options, necessity_by_association, options) do
     case Uncles.take_enough(paging_options.page_size) do
       nil ->
-        elements = fetch_blocks(block_type, paging_options, necessity_by_association)
+        elements = fetch_blocks(block_type, paging_options, necessity_by_association, options)
 
         Uncles.update(elements)
 
@@ -2344,14 +2346,14 @@ defmodule Explorer.Chain do
     end
   end
 
-  defp fetch_blocks(block_type, paging_options, necessity_by_association) do
+  defp fetch_blocks(block_type, paging_options, necessity_by_association, options) do
     Block
     |> Block.block_type_filter(block_type)
     |> page_blocks(paging_options)
     |> limit(^paging_options.page_size)
     |> order_by(desc: :number)
     |> join_associations(necessity_by_association)
-    |> Repo.all()
+    |> select_repo(options).all()
   end
 
   @doc """
@@ -3193,7 +3195,7 @@ defmodule Explorer.Chain do
       `t:Explorer.Chain.Block.t/0` will not be included in the page `entries`.
 
   """
-  @spec number_to_block(Block.block_number(), [necessity_by_association_option]) ::
+  @spec number_to_block(Block.block_number(), Keyword.t()) ::
           {:ok, Block.t()} | {:error, :not_found}
   def number_to_block(number, options \\ []) when is_list(options) do
     necessity_by_association = Keyword.get(options, :necessity_by_association, %{})
@@ -3201,7 +3203,7 @@ defmodule Explorer.Chain do
     Block
     |> where(consensus: true, number: ^number)
     |> join_associations(necessity_by_association)
-    |> Repo.one()
+    |> select_repo(options).one()
     |> case do
       nil -> {:error, :not_found}
       block -> {:ok, block}
@@ -3329,7 +3331,8 @@ defmodule Explorer.Chain do
       paging_options,
       necessity_by_association,
       method_id_filter,
-      type_filter
+      type_filter,
+      options
     )
   end
 
@@ -3393,7 +3396,8 @@ defmodule Explorer.Chain do
         paging_options,
         necessity_by_association,
         method_id_filter,
-        type_filter
+        type_filter,
+        options
       ) do
     paging_options
     |> fetch_transactions()
@@ -3402,10 +3406,11 @@ defmodule Explorer.Chain do
     |> apply_filter_by_tx_type_to_transactions(type_filter)
     |> join_associations(necessity_by_association)
     |> (&if(old_ui?, do: preload(&1, [{:token_transfers, [:token, :from_address, :to_address]}]), else: &1)).()
-    |> Repo.all()
+    |> select_repo(options).all()
     |> (&if(old_ui?,
           do: &1,
-          else: Enum.map(&1, fn tx -> preload_token_transfers(tx, @token_transfers_necessity_by_association) end)
+          else:
+            Enum.map(&1, fn tx -> preload_token_transfers(tx, @token_transfers_necessity_by_association, options) end)
         )).()
   end
 
@@ -3452,10 +3457,11 @@ defmodule Explorer.Chain do
     |> order_by([transaction], desc: transaction.inserted_at, asc: transaction.hash)
     |> join_associations(necessity_by_association)
     |> (&if(old_ui?, do: preload(&1, [{:token_transfers, [:token, :from_address, :to_address]}]), else: &1)).()
-    |> Repo.all()
+    |> select_repo(options).all()
     |> (&if(old_ui?,
           do: &1,
-          else: Enum.map(&1, fn tx -> preload_token_transfers(tx, @token_transfers_necessity_by_association) end)
+          else:
+            Enum.map(&1, fn tx -> preload_token_transfers(tx, @token_transfers_necessity_by_association, options) end)
         )).()
   end
 
@@ -4711,11 +4717,12 @@ defmodule Explorer.Chain do
     )
   end
 
+  def page_current_token_balances(query, keyword) when is_list(keyword),
+    do: page_current_token_balances(query, Keyword.get(keyword, :paging_options))
+
   def page_current_token_balances(query, %PagingOptions{key: nil}), do: query
 
-  def page_current_token_balances(query, paging_options: %PagingOptions{key: nil}), do: query
-
-  def page_current_token_balances(query, paging_options: %PagingOptions{key: {name, type, value}}) do
+  def page_current_token_balances(query, %PagingOptions{key: {name, type, value}}) do
     where(
       query,
       [ctb, t],
