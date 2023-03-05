@@ -17,7 +17,7 @@ services:
       - db
       - smart-contract-verifier
       - redis_db
-    image: blockscout/blockscout:${DOCKER_TAG:-latest}
+    image: basename-web:latest
     build:
       context: ..
       dockerfile: ./docker/Dockerfile
