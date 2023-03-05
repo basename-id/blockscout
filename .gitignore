@@ -48,6 +48,7 @@ screenshots/
 
 /docker-compose/postgres-data
 /docker-compose/redis-data
+/docker-compose/redis-data/*
 /docker-compose/tmp
 /docker-compose/logs
 
