@@ -60,7 +60,7 @@ msgstr ""
 
 #: lib/block_scout_web/templates/layout/_default_title.html.eex:2
 #, elixir-autogen, elixir-format
-msgid "%{subnetwork} Explorer - BlockScout"
+msgid "%{subnetwork} Explorer - Basename"
 msgstr ""
 
 #: lib/block_scout_web/views/transaction_view.ex:365
@@ -134,7 +134,7 @@ msgstr ""
 
 #: lib/block_scout_web/templates/api_docs/_metatags.html.eex:2
 #, elixir-autogen, elixir-format
-msgid "API for the %{subnetwork} - BlockScout"
+msgid "API for the %{subnetwork} - Basename"
 msgstr ""
 
 #: lib/block_scout_web/templates/account/api_key/form.html.eex:7

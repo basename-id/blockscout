@@ -130,7 +130,7 @@
   -webkit-appearance: none !important;
   align-items: center;
   background-color: $bg-color;
-  border-radius: 2px;
+  border-radius: 8px;
   border: 1px solid $text-color;
   color: $text-color;
   cursor: pointer;
@@ -228,7 +228,7 @@
   }
 
   svg {
-    vertical-align: text-bottom;   
+    vertical-align: text-bottom;
     margin-bottom: -1.1px;
   }
 

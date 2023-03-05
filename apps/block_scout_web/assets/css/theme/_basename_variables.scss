@@ -1,0 +1,34 @@
+// general
+$primary: #0000FF;
+$secondary: #87e1a9;
+$tertiary: #bf9cff;
+$additional-font: #fff;
+
+$btn-line-color: #fff; // bg
+$btn-line-bg: $primary; // button border and font color && hover bg color
+
+.js-ad-dependant-pt {
+  > .container {
+    display: flex;
+    gap: 16px;
+
+    .card-title {
+      margin-top: 10px;
+    }
+
+
+    .card-chain-blocks {
+      .card-body {
+        .row {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+
+          .loading-spinner-small {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}

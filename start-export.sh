@@ -1,0 +1,9 @@
+export ETHEREUM_JSONRPC_VARIANT=geth
+export ETHEREUM_JSONRPC_HTTP_URL=https://ethereum.publicnode.com/
+export DATABASE_URL=postgresql://postgres:roman2023@localhost:5432/blockscout
+export ETHEREUM_JSONRPC_TRACE_URL=https://ethereum.publicnode.com/
+export NETWORK=(Ethereum)
+export SUBNETWORK=Ethereum
+export COIN_NAME=ETH
+export CHAIN_ID=1
+export SECRET_KEY_BASE=VTIB3uHDNbvrY0+60ZWgUoUBKDn9ppLR8MI4CpRz4/qLyEFs54ktJfaNT6Z221No

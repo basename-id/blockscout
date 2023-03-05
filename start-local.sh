@@ -1,0 +1,1 @@
+mix do deps.get, local.rebar --force, deps.compile && mix compile && cd apps/block_scout_web/assets && node_modules/webpack/bin/webpack.js --mode production && cd - && mix phx.digest && mix phx.server
