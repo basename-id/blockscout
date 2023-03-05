@@ -6,11 +6,10 @@ defmodule Explorer.Chain.Block.Reward do
   use Explorer.Schema
 
   alias Explorer.Application.Constants
-  alias Explorer.Chain
+  alias Explorer.{Chain, PagingOptions}
   alias Explorer.Chain.Block.Reward.AddressType
   alias Explorer.Chain.{Address, Block, Hash, Validator, Wei}
   alias Explorer.Chain.Fetcher.FetchValidatorInfoOnDemand
-  alias Explorer.{PagingOptions, Repo}
   alias Explorer.SmartContract.Reader
 
   @required_attrs ~w(address_hash address_type block_hash reward)a
