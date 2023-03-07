@@ -48,7 +48,7 @@
               </div>
               <%= error_tag f, :verify_via, id: "verify_via-help-block", class: "text-danger form-error" %>
             </div>
-            <div class="smart-contract-form-group-tooltip">Choose a smart-contract verification method. Currently, Blockscout supports 2 methods:<br/>
+            <div class="smart-contract-form-group-tooltip">Choose a smart-contract verification method. Currently, Basename supports 2 methods:<br/>
             1. Verification through flattened source code. <span
                       data-toggle="tooltip"
                       data-placement="top"
@@ -62,7 +62,7 @@
               b) otherwise you will be asked to upload source files and JSON metadata file(s).<br/>
             4. Verification of Vyper contract.
             </div>
-              
+
           </div>
         </div>
 

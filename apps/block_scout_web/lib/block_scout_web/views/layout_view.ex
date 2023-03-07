@@ -63,7 +63,7 @@ defmodule BlockScoutWeb.LayoutView do
 
   def issue_link(conn) do
     params = [
-      labels: "BlockScout",
+      labels: "Basename",
       body: issue_body(conn),
       title: subnetwork_title() <> ": <Issue Title>"
     ]

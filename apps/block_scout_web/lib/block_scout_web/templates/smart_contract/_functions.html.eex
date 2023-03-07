@@ -8,7 +8,7 @@
     <% else %>
       <% path = address_verify_contract_path(@conn, :new, @address.hash) %>
       <div class="mb-4">
-        <%= render BlockScoutWeb.CommonComponentsView, "_info.html" %><span> <%= gettext("Contract is not verified. However, we found a verified contract with the same bytecode in Blockscout DB") %> <%= link(
+        <%= render BlockScoutWeb.CommonComponentsView, "_info.html" %><span> <%= gettext("Contract is not verified. However, we found a verified contract with the same bytecode in Basename DB") %> <%= link(
   metadata_for_verification.address_hash,
   to: address_contract_path(@conn, :index, metadata_for_verification.address_hash)) %>.<br/> <%= gettext("All functions displayed below are from ABI of that contract. In order to verify current contract, proceed with") %> <%= link(
         gettext("Verify & Publish"),
@@ -52,8 +52,8 @@
 
     <%= if queryable?(function["inputs"]) || writable?(function) || Helper.read_with_wallet_method?(function) do %>
       <div style="width: 100%; overflow: hidden;">
-        <% function_abi = 
-                    case Jason.encode([function]) do 
+        <% function_abi =
+                    case Jason.encode([function]) do
                       {:ok, abi_string} ->
                         abi_string
                       _ ->
@@ -61,7 +61,7 @@
                           @implementation_abi
                         else
                           @contract_abi
-                        end 
+                        end
                     end %>
         <form class="form-inline" data-function-form data-action="<%= if @action == "write", do: :write, else: :read %>" data-type="<%= @contract_type %>" data-url="<%= smart_contract_path(@conn, :show, Address.checksum(@address.hash)) %>" data-contract-address="<%= @address.hash %>" data-contract-abi="<%= function_abi %>" data-implementation-abi="<%= function_abi %>" data-chain-id="<%= Application.get_env(:block_scout_web, :chain_id) %>" data-custom-abi="<%= if assigns[:custom_abi], do: true, else: false %>">
           <input type="hidden" name="function_name" value='<%= function["name"] %>' />
@@ -78,17 +78,17 @@
                     <span class="button btn-line button-xs contract-plus-btn-container ml-1">
                       <i class="fa fa-plus contract-plus-btn"></i>
                     </span>
-                    <div class="dropdown-menu exponention-dropdown">  
+                    <div class="dropdown-menu exponention-dropdown">
                       <div class="dropdown-item contract-exponentiation-btn" data-power=6>10<sup>6</sup></div>
                       <div class="dropdown-item contract-exponentiation-btn" data-power=8>10<sup>8</sup></div>
                       <div class="dropdown-item contract-exponentiation-btn" data-power=18>10<sup>18</sup></div>
-                      <div class="dropdown-item contract-exponentiation-btn" data-power><input type="number" name="custom_power" class="form-control form-control-sm address-input-sm ml-1 custom-power-input" />10</div> 
+                      <div class="dropdown-item contract-exponentiation-btn" data-power><input type="number" name="custom_power" class="form-control form-control-sm address-input-sm ml-1 custom-power-input" />10</div>
                     </div>
                   </span>
 
                 <% else %>
-                  <input type="text" name="function_input" class="form-control form-control-sm address-input-sm" 
-                  placeholder='<%= input["name"] %>(<%= input["type"] %>)' 
+                  <input type="text" name="function_input" class="form-control form-control-sm address-input-sm"
+                  placeholder='<%= input["name"] %>(<%= input["type"] %>)'
                   size="<%= String.length(input["name"]) + String.length(input["type"]) + 2 %>" />
                 <% end %>
               </div>
@@ -143,7 +143,7 @@
                         <span class="d-none" data-conversion-text-eth><%= Explorer.coin_name() %></span>
                       </span>
                     </div>
-                  </div> 
+                  </div>
                 <% else %>
                   <div class="align-self-center function-output word-break-all <%= if not_last_element?(length, index), do: "mb-1" %>"><%= raw(values_with_type(output["value"], output["type"], [output["name"]], 0, output["components"])) %></div>
                 <% end %>

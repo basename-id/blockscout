@@ -53,7 +53,7 @@ defmodule BlockScoutWeb.API.V1.HealthController do
       "error_code" => 5001,
       "error_title" => "blocks fetching is stuck",
       "error_description" =>
-        "There are no new blocks in the DB for the last #{healthy_blocks_period_formatted} mins. Check the healthiness of Ethereum archive node or the Blockscout DB instance",
+        "There are no new blocks in the DB for the last #{healthy_blocks_period_formatted} mins. Check the healthiness of Ethereum archive node or the Basename DB instance",
       "data" => %{
         "latest_block_number" => to_string(number),
         "latest_block_inserted_at" => to_string(timestamp)

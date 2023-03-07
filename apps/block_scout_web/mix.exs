@@ -9,7 +9,7 @@ defmodule BlockScoutWeb.Mixfile do
       config_path: "../../config/config.exs",
       deps: deps(),
       deps_path: "../../deps",
-      description: "Web interface for BlockScout.",
+      description: "Web interface for Basename.",
       dialyzer: [
         plt_add_deps: :transitive,
         ignore_warnings: "../../.dialyzer-ignore"

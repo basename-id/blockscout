@@ -125,7 +125,7 @@ defmodule BlockScoutWeb.AddressContractVerificationController do
       if Chain.smart_contract_fully_verified?(address_hash_string) do
         EventsPublisher.broadcast(
           PublishHelper.prepare_verification_error(
-            "This contract already verified in Blockscout.",
+            "This contract already verified in Basename.",
             address_hash_string,
             conn
           ),

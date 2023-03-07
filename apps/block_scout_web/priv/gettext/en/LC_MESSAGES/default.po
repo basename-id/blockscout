@@ -464,7 +464,7 @@ msgstr ""
 
 #: lib/block_scout_web/templates/chain/_metatags.html.eex:4
 #, elixir-autogen, elixir-format
-msgid "BlockScout provides analytics data, API, and Smart Contract tools for the %{subnetwork}"
+msgid "Basename provides analytics data, API, and Smart Contract tools for the %{subnetwork}"
 msgstr ""
 
 #: lib/block_scout_web/templates/layout/_topnav.html.eex:29
@@ -499,7 +499,7 @@ msgstr ""
 
 #: lib/block_scout_web/templates/layout/_footer.html.eex:22
 #, elixir-autogen, elixir-format
-msgid "Blockscout is a tool for inspecting and analyzing EVM based blockchains. Blockchain explorer for Ethereum Networks."
+msgid "Basename is a tool for inspecting and analyzing EVM based blockchains. Blockchain explorer for Ethereum Networks."
 msgstr ""
 
 #: lib/block_scout_web/templates/transaction_state/_state_change.html.eex:8
@@ -740,7 +740,7 @@ msgstr ""
 #: lib/block_scout_web/templates/address_contract/index.html.eex:26
 #: lib/block_scout_web/templates/smart_contract/_functions.html.eex:11
 #, elixir-autogen, elixir-format
-msgid "Contract is not verified. However, we found a verified contract with the same bytecode in Blockscout DB"
+msgid "Contract is not verified. However, we found a verified contract with the same bytecode in Basename DB"
 msgstr ""
 
 #: lib/block_scout_web/templates/verified_contracts/index.html.eex:41
@@ -2603,7 +2603,7 @@ msgstr ""
 
 #: lib/block_scout_web/templates/api_docs/index.html.eex:6
 #, elixir-autogen, elixir-format
-msgid "This API is provided for developers transitioning their applications from Etherscan to BlockScout. It supports GET and POST requests."
+msgid "This API is provided for developers transitioning their applications from Etherscan to Basename. It supports GET and POST requests."
 msgstr ""
 
 #: lib/block_scout_web/templates/api_docs/eth_rpc.html.eex:7
@@ -3303,7 +3303,7 @@ msgstr ""
 
 #: lib/block_scout_web/templates/account/public_tags_request/index.html.eex:11
 #, elixir-autogen, elixir-format
-msgid "You can request a public category tag which is displayed to all Blockscout users. Public tags may be added to contract or external addresses, and any associated transactions will inherit that tag. Clicking a tag opens a page with related information and helps provide context and data organization. Requests are sent to a moderator for review and approval. This process can take several days."
+msgid "You can request a public category tag which is displayed to all Basename users. Public tags may be added to contract or external addresses, and any associated transactions will inherit that tag. Clicking a tag opens a page with related information and helps provide context and data organization. Requests are sent to a moderator for review and approval. This process can take several days."
 msgstr ""
 
 #: lib/block_scout_web/templates/account/tag_address/index.html.eex:14
