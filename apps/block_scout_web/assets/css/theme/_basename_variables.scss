@@ -11,28 +11,28 @@ $footer-item-disc-color: $base-primary;
 $btn-line-color: #fff; // bg
 $btn-line-bg: $primary; // button border and font color && hover bg color
 
-.js-ad-dependant-pt {
-  > .container {
-    display: flex;
-    gap: 16px;
+// .js-ad-dependant-pt {
+//   > .container {
+//     // display: flex;
+//     // gap: 16px;
 
-    .card-title {
-      margin-top: 10px;
-    }
+//     .card-title {
+//       margin-top: 10px;
+//     }
 
 
-    .card-chain-blocks {
-      .card-body {
-        .row {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
+//     .card-chain-blocks {
+//       .card-body {
+//         .row {
+//           display: flex;
+//           flex-direction: column;
+//           gap: 16px;
 
-          .loading-spinner-small {
-            display: none;
-          }
-        }
-      }
-    }
-  }
-}
+//           .loading-spinner-small {
+//             display: none;
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
