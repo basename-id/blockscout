@@ -499,7 +499,7 @@ msgstr ""
 
 #: lib/block_scout_web/templates/layout/_footer.html.eex:22
 #, elixir-autogen, elixir-format
-msgid "Basename is a tool for inspecting and analyzing EVM based blockchains. Blockchain explorer for Ethereum Networks."
+msgid "Basename is a tool for inspecting and analyzing EVM based blockchains. Blockchain explorer for Base Networks."
 msgstr ""
 
 #: lib/block_scout_web/templates/transaction_state/_state_change.html.eex:8
@@ -2608,7 +2608,7 @@ msgstr ""
 
 #: lib/block_scout_web/templates/api_docs/eth_rpc.html.eex:7
 #, elixir-autogen, elixir-format
-msgid "This API is provided to support some rpc methods in the exact format specified for ethereum nodes, which can be found "
+msgid "This API is provided to support some rpc methods in the exact format specified for Base nodes, which can be found "
 msgstr ""
 
 #: lib/block_scout_web/views/block_transaction_view.ex:11

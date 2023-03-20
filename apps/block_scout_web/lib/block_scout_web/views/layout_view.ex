@@ -20,7 +20,7 @@ defmodule BlockScoutWeb.LayoutView do
       url: "https://blockscout.com/xdai/mainnet"
     },
     %{
-      title: "Ethereum Classic",
+      title: "Base",
       url: "https://blockscout.com/etc/mainnet",
       other?: true
     },
